@@ -26,7 +26,7 @@ tesselate<- function(shape, n, type = "hexagonal") {
     return(tesselation)
 }
 
-#' Create an adjacency matrix from a tesselation
+#' Create a directed adjacency matrix from a tesselation
 #' 
 #' The tesselation is converted into a directed acyclic graph
 #' 
@@ -36,7 +36,7 @@ tesselate<- function(shape, n, type = "hexagonal") {
 #' @return A direct acyclic graph from the igraph package
 #' 
 #' @export
-make_directed_adjacency_graph<- function(tesselation) {
+dagify<- function(tesselation) {
     graph<- tesselation |>
         sf::st_touches(sparse = FALSE) |>
         (\(x) {x[x |> lower.tri()]<- FALSE; return(x)})() |>

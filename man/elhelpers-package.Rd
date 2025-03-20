@@ -4,12 +4,12 @@
 \name{elhelpers-package}
 \alias{elhelpers}
 \alias{elhelpers-package}
-\title{elhelpers: What the Package Does (One Line, Title Case)}
+\title{elhelpers: Helper functions used in many analyses}
 \description{
 What the package does (one paragraph).
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com}
+\strong{Maintainer}: Ethan Lawler \email{lawlerem@gmail.com}
 
 }
 \keyword{internal}
