@@ -13,8 +13,8 @@
 #' 
 #' @export
 tesselate<- function(shape, n, type = "hexagonal") {
+    shape<- shape |> sf::st_union()
     tesselation<- shape |>
-        sf::st_union() |>
         sf::st_sample(
             n,
             type = type
