@@ -15,7 +15,8 @@ into a single polygon before creating the tesselation.}
 \item{type}{The type of tesselation. See sf::st_sample.}
 }
 \value{
-An sf data.frame containing the tesselation polygons.
+An sf data.frame containing the tesselation polygons and an index
+column.
 }
 \description{
 Make a tessellation of a polygon.

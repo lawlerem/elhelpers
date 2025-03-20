@@ -8,7 +8,8 @@
 #' @param type 
 #'     The type of tesselation. See sf::st_sample.
 #' 
-#' @return An sf data.frame containing the tesselation polygons.
+#' @return An sf data.frame containing the tesselation polygons and an index
+#'     column.
 #' 
 #' @export
 tesselate<- function(shape, n, type = "hexagonal") {
@@ -23,6 +24,7 @@ tesselate<- function(shape, n, type = "hexagonal") {
         sf::st_cast() |>
         sf::st_as_sf() |>
         sf::st_intersection(shape)
+    tesselation$tesselation<- tesselation |> nrow() |> seq()
     return(tesselation)
 }
 
