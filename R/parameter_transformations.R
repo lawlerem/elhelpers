@@ -15,7 +15,12 @@
 #' 
 #' @export
 crl<- function(qpi) {
-    pi<- qpi |> stats::plogis() |> c(1)
+    if( requireNamespace("RTMB", quietly = TRUE) ) {
+        plogis<- RTMB::plogis
+    } else {
+        plogis<- stats::plogis
+    }
+    pi<- qpi |> plogis() |> c(1)
     p<- pi
     for( i in p |> seq_along() ) {
         p[i] <- pi[i]
@@ -34,6 +39,12 @@ icrl<- function(p) {
         for( j in seq_len(i - 1) ) {
             pi[i]<- pi[i] / (1 - pi[j])
         }
+    }
+
+    if( requireNamespace("RTMB", quietly = TRUE) ) {
+        qlogis<- RTMB::qlogis
+    } else {
+        qlogis<- stats::qlogis
     }
     qpi<- pi |> stats::qlogis()
     return(qpi)
