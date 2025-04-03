@@ -21,13 +21,9 @@ crl<- function(qpi) {
         plogis<- stats::plogis
     }
     pi<- qpi |> plogis() |> c(1)
-    p<- pi
-    for( i in p |> seq_along() ) {
-        p[i] <- pi[i]
-        for( j in seq_len(i - 1) ) {
-            p[i]<- p[i] * (1 - pi[j])
-        }
-    }
+    qi<- 1 - pi
+    cqi<- qi |> head(-1) |> (\(x) c(1, x))() |> cumprod()
+    p<- pi * cqi
     return( p )
 }
 #' @rdname crl
