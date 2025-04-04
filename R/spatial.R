@@ -88,7 +88,8 @@ make_cell_key<- function(
                     geometry = x |> sf::st_geometry()
                 )
             )() |>
-            stars::st_rasterize(target_raster, align = TRUE)
+            stars::st_rasterize(cell_key, align = TRUE) |>
+            stars::st_warp(cell_key)
         cell_key<- c(cell_key, tesselation_raster)
     }
     return(cell_key)
