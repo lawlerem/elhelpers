@@ -34,14 +34,18 @@ tesselate<- function(shape, n, type = "hexagonal") {
 #' 
 #' @param tesselation
 #'     An sf data.frame containing polygons
+#' @param sf_predicate
+#'     The function used to determine node adjacency, see ?sf::geos_binary_pred.
+#' @param ...
+#'     Additional arguments to pass to sf_predicate.
 #' 
 #' @return A direct acyclic graph from the igraph package
 #' 
 #' @export
-dagify<- function(tesselation) {
+dagify<- function(tesselation, sf_predicate = sf::st_touches, ...) {
     graph<- tesselation |>
-        sf::st_touches(sparse = FALSE) |>
-        (\(x) {x[x |> lower.tri()]<- FALSE; return(x)})() |>
+        sf_predicate(sparse = FALSE, ...) |>
+        (\(x) {x[x |> lower.tri(diag = TRUE)]<- FALSE; return(x)})() |>
         igraph::graph_from_adjacency_matrix()
     return(graph)
 }

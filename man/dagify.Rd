@@ -4,10 +4,14 @@
 \alias{dagify}
 \title{Create a directed adjacency matrix from a tesselation}
 \usage{
-dagify(tesselation)
+dagify(tesselation, sf_predicate = sf::st_touches, ...)
 }
 \arguments{
 \item{tesselation}{An sf data.frame containing polygons}
+
+\item{sf_predicate}{The function used to determine node adjacency, see ?sf::geos_binary_pred.}
+
+\item{...}{Additional arguments to pass to sf_predicate.}
 }
 \value{
 A direct acyclic graph from the igraph package
