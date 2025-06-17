@@ -17,11 +17,14 @@ ddirichlet<- function(x, pi, concentration, log = TRUE) {
         stop("Must have RTMB installed.")
     }
     alpha<- concentration * pi
-    ll<- alpha |>
-        sapply(lgamma) |>
+    alg<- 0 * alpha
+    for( i in alg |> seq_along() ) alg[i]<- lgamma(alpha[i])
+    logconst<- alg |>
         sum() |>
-        (\(x) lgamma(concentration) - x)() |>
-        (\(x) x + (alpha - 1) * log(x) |> sum())()
+        (\(logdenom) lgamma(concentration) - logdenom)() 
+    ll<- ((alpha - 1) * log(x)) |>
+        sum() |>
+        (\(y) y + logconst)()
     if( !log ) ll<- ll |> exp()
     return(ll)
 }
