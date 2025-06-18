@@ -4,12 +4,17 @@
 \alias{dagify}
 \title{Create a directed adjacency matrix from a tesselation}
 \usage{
-dagify(tesselation, sf_predicate = sf::st_touches, ...)
+dagify(tesselation, sf_predicate = sf::st_touches, adjacency_power = 1, ...)
 }
 \arguments{
 \item{tesselation}{An sf data.frame containing polygons}
 
 \item{sf_predicate}{The function used to determine node adjacency, see ?sf::geos_binary_pred.}
+
+\item{adjacency_power}{The (undirected) adjacency matrix will be raised to this power to
+increase the neighbour size. E.g. if p1 -> p2 -> ... -> pk is a chain of
+parents according to sf_predicate, then p1 -> pk if the adjacency_power
+is k.}
 
 \item{...}{Additional arguments to pass to sf_predicate.}
 }

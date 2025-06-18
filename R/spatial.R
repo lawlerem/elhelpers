@@ -23,7 +23,9 @@ tesselate<- function(shape, n, type = "hexagonal") {
         sf::st_voronoi() |>
         sf::st_cast() |>
         sf::st_as_sf() |>
-        sf::st_intersection(shape)
+        sf::st_intersection(shape) |>
+        sf::st_cast() |>
+        sf::st_cast("POLYGON")
     tesselation$tesselation<- tesselation |> nrow() |> seq()
     return(tesselation)
 }
@@ -36,15 +38,37 @@ tesselate<- function(shape, n, type = "hexagonal") {
 #'     An sf data.frame containing polygons
 #' @param sf_predicate
 #'     The function used to determine node adjacency, see ?sf::geos_binary_pred.
+#' @param adjacency_power
+#'     The (undirected) adjacency matrix will be raised to this power to
+#'     increase the neighbour size. E.g. if p1 -> p2 -> ... -> pk is a chain of
+#'     parents according to sf_predicate, then p1 -> pk if the adjacency_power
+#'     is k.
 #' @param ...
 #'     Additional arguments to pass to sf_predicate.
 #' 
 #' @return A direct acyclic graph from the igraph package
 #' 
 #' @export
-dagify<- function(tesselation, sf_predicate = sf::st_touches, ...) {
+dagify<- function(
+        tesselation, 
+        sf_predicate = sf::st_touches,
+        adjacency_power = 1,
+        ...
+    ) {
     graph<- tesselation |>
         sf_predicate(sparse = FALSE, ...) |>
+        (\(x) {
+            adjacency_power<- adjacency_power |> round()
+            if( adjacency_power == 1 ) return(x)
+            diag(x)<- 1
+            e<- x |> eigen(symmetric = TRUE)
+            e$values<- e$values^adjacency_power
+            x<- e$vectors %*% diag(e$values) %*% t(e$vectors)
+            eps<- 0.01
+            x[x >= (1 - eps)]<- 1
+            x[x < (1 - eps)]<- 0
+            return(x)
+        })() |>
         (\(x) {x[x |> lower.tri(diag = TRUE)]<- FALSE; return(x)})() |>
         igraph::graph_from_adjacency_matrix()
     return(graph)
