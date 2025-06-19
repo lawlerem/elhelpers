@@ -17,6 +17,7 @@
 crl<- function(qpi) {
     if( requireNamespace("RTMB", quietly = TRUE) ) {
         plogis<- RTMB::plogis
+        c<- RTMB::ADoverload("c")
     } else {
         plogis<- stats::plogis
     }
@@ -42,6 +43,6 @@ icrl<- function(p) {
     } else {
         qlogis<- stats::qlogis
     }
-    qpi<- pi |> stats::qlogis()
+    qpi<- pi |> qlogis()
     return(qpi)
 }
