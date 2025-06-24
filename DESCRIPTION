@@ -1,6 +1,6 @@
 Package: elhelpers
 Title: Helper functions used in many analyses
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: 
     person("Ethan", "Lawler", , "lawlerem@gmail.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
