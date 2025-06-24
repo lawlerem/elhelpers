@@ -61,12 +61,14 @@ dagify<- function(
             adjacency_power<- adjacency_power |> round()
             if( adjacency_power == 1 ) return(x)
             diag(x)<- 1
-            e<- x |> eigen(symmetric = TRUE)
-            e$values<- e$values^adjacency_power
-            x<- e$vectors %*% diag(e$values) %*% t(e$vectors)
-            eps<- 0.01
-            x[x >= (1 - eps)]<- 1
-            x[x < (1 - eps)]<- 0
+            x<- x |> Matrix::Matrix(sparse = TRUE)
+            y<- x
+            i<- 2
+            while( i <= adjacency_power ) {
+                y<- y %*% x
+                i<- i + 1
+            }
+            x<- y |> as.matrix() |> (\(x) (x != 0))()
             return(x)
         })() |>
         (\(x) {x[x |> lower.tri(diag = TRUE)]<- FALSE; return(x)})() |>
