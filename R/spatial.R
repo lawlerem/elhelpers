@@ -125,3 +125,112 @@ make_cell_key<- function(
     return(cell_key)
 }
 
+
+
+#' Transform one polygon geometry to another using area-weighted averages
+#' 
+#' @param x An 'sf' or 'stars' object with POLYGON geometries
+#' @param y An 'sf' object with the target POLYGON geometries
+#' 
+#' @return An 'sf' or 'stars' object with the same attributes and dimensions as
+#'     x and the same geometry as y.
+#' 
+#' @export
+st_repolygonize<- function(
+        x,
+        y
+    ) {
+    if( x |> inherits("sf") ) return(st_repolygonize_sf(x, y))
+    if( x |> inherits("stars") ) return(st_repolygonize_stars(x, y))
+    stop("x must be an 'sf' or 'stars' object.")
+}
+st_repolygonize_sf<- function(
+        x,
+        y
+    ) {
+    y<- y |> sf::st_intersection(x |> sf::st_geometry() |> sf::st_union())
+    xgeo<- x |> 
+        sf::st_geometry() |> 
+        (\(x) sf::st_sf(x = x |> seq_along(), geometry = x))()
+    ygeo<- y |>
+        sf::st_geometry() |>
+        sf::st_intsersection(xgeo |> sf::st_geometry() |> sf::st_union()) |>
+        (\(y) sf::st_sf(y = y |> seq_along(), geometry = y))()
+    refined<- xgeo |> sf::st_intersection(ygeo)
+    refined$area<- refined |> sf::st_area()
+    refined$weight<- refined$area / sf::st_area(ygeo)[refined$y]
+
+    A<- Matrix::sparseMatrix(
+            x = refined |> _$weight |> as.numeric(),
+            i = refined |> _$y,
+            j = refined |> _$x
+        )
+    y<- sf::st_as_sf(
+            x |> 
+                sf::st_drop_geometry() |> 
+                as.matrix() |> 
+                (\(x) A %*% x)() |>
+                as.matrix() |>
+                as.data.frame(),
+            geometry = ygeo |> sf::st_geometry()
+        )
+    return(y)
+}
+st_repolygonize_stars<- function(
+        x,
+        y
+    ) {
+    xgeo<- x |>
+        sf::st_geometry() |>
+        (\(x) sf::st_sf(x = x |> seq_along(), geometry = x))()
+    ygeo<- y |>
+        sf::st_geometry() |>
+        sf::st_intersection(xgeo |> sf::st_geometry() |> sf::st_union()) |>
+        (\(y) sf::st_sf(y = y |> seq_along(), geometry = y))()
+    ydim<- x |> stars::st_dimensions()
+
+    geodim<- ydim |>
+        seq_along() |>
+        sapply(
+            function(v) {
+                ydim |> 
+                    stars::st_get_dimension_values(v) |>
+                    inherits("sfc")
+            }
+        ) |>
+        which() |>
+        min()
+    ydim[[geodim]]<- ygeo |>
+        stars::st_as_stars() |>
+        stars::st_dimensions() |>
+        _[[1]]
+    y<- x |>
+        names() |>
+        lapply(function(v) array(0, dim = ydim |> dim())) |>
+        setNames(x |> names()) |>
+        stars::st_as_stars(dimensions = ydim)
+
+    refined<- xgeo |> sf::st_intersection(ygeo)
+    refined$area<- refined |> sf::st_area()
+    refined$weight<- refined$area / sf::st_area(ygeo)[refined$y]
+
+    A<- Matrix::sparseMatrix(
+            x = refined |> _$weight |> units::drop_units(),
+            i = refined |> _$y,
+            j = refined |> _$x
+        )
+    
+    put_geodim_first<- c(geodim, ydim |> seq_along() |> _[-geodim])
+    put_first_to_geodim<- ydim |> seq_along() |> match(put_geodim_first)
+
+    for( v in y |> names() |> seq_along() ) {
+        y[[v]]<- x |>
+            _[[v]] |>
+            aperm(put_geodim_first) |>
+            matrix(nrow = xgeo |> nrow()) |>
+            (\(x) A %*% x)() |>
+            array(dim = ydim |> dim() |> _[put_geodim_first]) |>
+            aperm(put_first_to_geodim)
+    }
+    return(y)
+}

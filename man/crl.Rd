@@ -23,4 +23,8 @@ A numeric vector
 When using crl, the output vector will have one additional element added to
 the end compared to the input vector to ensure probabilities add to 1.
 When using icrl, the last element of the input is discarded.
+Can be vectorized, in which case elements with the same (n-1) indices
+will be treated as parameters for the same probability vector.
+For example if x is a 3 dimensional array, then the operation is applied to
+each vector x\link{i, j, }.
 }
