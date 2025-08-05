@@ -154,7 +154,7 @@ st_repolygonize_sf<- function(
         (\(x) sf::st_sf(x = x |> seq_along(), geometry = x))()
     ygeo<- y |>
         sf::st_geometry() |>
-        sf::st_intsersection(xgeo |> sf::st_geometry() |> sf::st_union()) |>
+        sf::st_intersection(xgeo |> sf::st_geometry() |> sf::st_union()) |>
         (\(y) sf::st_sf(y = y |> seq_along(), geometry = y))()
     refined<- xgeo |> sf::st_intersection(ygeo)
     refined$area<- refined |> sf::st_area()
