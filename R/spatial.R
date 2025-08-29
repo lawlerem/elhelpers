@@ -137,44 +137,53 @@ make_cell_key<- function(
 #' 
 #' @export
 st_repolygonize<- function(
-        x,
-        y
+        source,
+        target
     ) {
-    if( x |> inherits("sf") ) return(st_repolygonize_sf(x, y))
-    if( x |> inherits("stars") ) return(st_repolygonize_stars(x, y))
-    stop("x must be an 'sf' or 'stars' object.")
+    if( source |> inherits("sf") ) return(st_repolygonize_sf(source, target))
+    if( source |> inherits("stars") ) return(st_repolygonize_stars(source, target))
+    stop("source must be an 'sf' or 'stars' object.")
 }
 st_repolygonize_sf<- function(
-        x,
-        y
+        source,
+        target
     ) {
-    y<- y |> sf::st_intersection(x |> sf::st_geometry() |> sf::st_union())
-    xgeo<- x |> 
+    source<- source |>
+        (\(x) {
+            is_complete<- x |>
+                sf::st_drop_geometry() |>
+                complete.cases()
+            x[is_complete, ]
+        })()
+    sourcegeo<- source |>
         sf::st_geometry() |> 
-        (\(x) sf::st_sf(x = x |> seq_along(), geometry = x))()
-    ygeo<- y |>
+        (\(x) sf::st_sf(source = x |> seq_along(), geometry = x))()
+    targetgeo<- target |>
         sf::st_geometry() |>
-        sf::st_intersection(xgeo |> sf::st_geometry() |> sf::st_union()) |>
-        (\(y) sf::st_sf(y = y |> seq_along(), geometry = y))()
-    refined<- xgeo |> sf::st_intersection(ygeo)
+        (\(y) sf::st_sf(target = y |> seq_along(), geometry = y))()
+    refined<- sourcegeo |> sf::st_intersection(targetgeo)
     refined$area<- refined |> sf::st_area()
-    refined$weight<- refined$area / sf::st_area(ygeo)[refined$y]
+    refined$weight<- refined |>
+        with(tapply(area, target, \(x) x / sum(x))) |>
+        do.call(c, args = _) |>
+        units::drop_units()
 
     A<- Matrix::sparseMatrix(
-            x = refined |> _$weight |> as.numeric(),
-            i = refined |> _$y,
-            j = refined |> _$x
+            x = refined |> _$weight,
+            i = refined |> _$target,
+            j = refined |> _$source,
+            dims = c(targetgeo |> nrow(), sourcegeo |> nrow())
         )
-    y<- sf::st_as_sf(
-            x |> 
+    ans<- sf::st_as_sf(
+            source |> 
                 sf::st_drop_geometry() |> 
                 as.matrix() |> 
                 (\(x) A %*% x)() |>
                 as.matrix() |>
                 as.data.frame(),
-            geometry = ygeo |> sf::st_geometry()
+            geometry = targetgeo |> sf::st_geometry()
         )
-    return(y)
+    return(ans)
 }
 st_repolygonize_stars<- function(
         x,
@@ -217,7 +226,8 @@ st_repolygonize_stars<- function(
     A<- Matrix::sparseMatrix(
             x = refined |> _$weight |> units::drop_units(),
             i = refined |> _$y,
-            j = refined |> _$x
+            j = refined |> _$x,
+            dims = c(ygeo |> nrow(), xgeo |> nrow())
         )
     
     put_geodim_first<- c(geodim, ydim |> seq_along() |> _[-geodim])
