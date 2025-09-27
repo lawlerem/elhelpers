@@ -26,5 +26,5 @@ When using icrl, the last element of the input is discarded.
 Can be vectorized, in which case elements with the same (n-1) indices
 will be treated as parameters for the same probability vector.
 For example if x is a 3 dimensional array, then the operation is applied to
-each vector x\link{i, j, }.
+each vector x(i, j, ).
 }

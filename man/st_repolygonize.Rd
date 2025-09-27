@@ -4,7 +4,7 @@
 \alias{st_repolygonize}
 \title{Transform one polygon geometry to another using area-weighted averages}
 \usage{
-st_repolygonize(x, y)
+st_repolygonize(source, target)
 }
 \arguments{
 \item{x}{An 'sf' or 'stars' object with POLYGON geometries}

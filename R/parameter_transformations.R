@@ -6,7 +6,7 @@
 #' Can be vectorized, in which case elements with the same (n-1) indices
 #'     will be treated as parameters for the same probability vector.
 #' For example if x is a 3 dimensional array, then the operation is applied to
-#'     each vector x[i, j, ].
+#'     each vector x(i, j, ).
 #'
 #' @param qpi 
 #'     An unbounded parameter vector to be transformed into a probability
@@ -99,3 +99,16 @@ icrl<- function(p) {
     }
     return(qpi)
 }
+
+#' Convert positive values to/from unbounded values.
+#' 
+#' @param x An unbounded numeric vector
+#' @param y A positive numeric vector
+#' 
+#' @return A numeric vector 
+#'
+#' @export
+softplus<- function(x) (x < 1) * exp(x - 1) + (x >= 1) * x
+#' @rdname softplus
+#' @export
+isoftplus<- function(y) (y < 1) * (log(y) + 1) + (y >= 1) * y
