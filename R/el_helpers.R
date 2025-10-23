@@ -23,14 +23,12 @@ lgamma<- function(x) NULL
             \(x) (x < 1) * exp(x - 1) + (x >= 1) * x,
             0
         )
-        softplus<- \(x) x |> sapply(sp)
+        softplus<- \(x) x |> RTMB::sapply(sp)
         isoftplus<- RTMB::MakeTape(
             \(y) (y < 1) * (log(y) + 1) + (y >= 1) * y,
             1
         )
-        isoftplus<- \(x) {
-            x |> sapply(isp)
-        }
+        isoftplus<- \(x) x |> RTMB::sapply(isp)
         assign(
             "softplus",
             softplus,
