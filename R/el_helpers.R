@@ -23,12 +23,21 @@ lgamma<- function(x) NULL
             \(x) (x < 1) * exp(x - 1) + (x >= 1) * x,
             0
         )
-        softplus<- \(x) x |> RTMB::sapply(sp)
-        isoftplus<- RTMB::MakeTape(
+        assign("sp", sp, .GlobalEnv)
+        softplus<- \(x) {
+            y<- x |> RTMB::sapply(sp)
+            if( !is.null(dim(x)) ) y<- array(y, dim = dim(x))
+            y
+        }
+        isp<- RTMB::MakeTape(
             \(y) (y < 1) * (log(y) + 1) + (y >= 1) * y,
             1
         )
-        isoftplus<- \(x) x |> RTMB::sapply(isp)
+        isoftplus<- \(x) {
+            y<- x |> RTMB::sapply(isp)
+            if( !is.null(dim(x)) ) y<- array(y, dim = dim(x))
+            y
+        }
         assign(
             "softplus",
             softplus,
