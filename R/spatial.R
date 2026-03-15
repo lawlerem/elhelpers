@@ -16,10 +16,7 @@ tesselate<- function(shape, n, type = "hexagonal") {
     shape<- shape |> sf::st_union()
     shape_area<- shape |> sf::st_area()
     tesselation<- shape |>
-        sf::st_sample(
-            n,
-            type = type
-        ) |>
+        sf::st_sample(n, type = type) |>
         sf::st_combine() |>
         sf::st_voronoi() |>
         sf::st_cast() |>
@@ -27,46 +24,28 @@ tesselate<- function(shape, n, type = "hexagonal") {
         sf::st_intersection(shape) |>
         sf::st_cast() |>
         sf::st_cast("POLYGON") |>
-        within(tesselation<- geometry |> seq_along())
-    tess_area<- tesselation |> sf::st_area()
-    is_small<- tess_area < ((0.05/n) * shape_area)
-    if( !any(is_small) ) return(tesselation)
-    collectors<- tesselation |>
-        _[is_small, ] |>
-        sf::st_touches(tesselation[!is_small, ], sparse = FALSE) |>
-        apply(1, \(x) which(x)[1]) |>
-        data.frame(
-            from = which(is_small),
-            to = _
-        ) |>
-        subset(!is.na(to))
-    while( nrow(collectors) >= 1 ) {
-        tesselation$tesselation[collectors$from]<- collectors$to
-        tesselation<- tesselation |>
-            split(f = tesselation$tesselation) |>
-            lapply(sf::st_union) |>
-            do.call(c, args = _) |>
-            sf::st_sf(geometry = _) |>
-            within(tesselation<- geometry |> seq_along())
-        tess_area<- tesselation |> sf::st_area()
-        is_small<- tess_area < ((0.05/n) * shape_area)
-        if( !any(is_small) ) {
-            collectors<- data.frame(x = numeric(0))
-            next
-        }
-        collectors<- tesselation |>
-            _[is_small, ] |>
-            sf::st_touches(tesselation[!is_small, ], sparse = FALSE) |>
-            apply(1, \(x) which(x)[1]) |>
-            data.frame(
-                from = which(is_small),
-                to = _
-            ) |>
-            subset(!is.na(to))
-    }
-    return(tesselation)
-}
+        within(area<- geometry |> sf::st_area())
 
+    good<- tesselation |> subset(area >= (0.05 / n) * shape_area) |>
+        within(tesselation<- geometry |> seq_along())
+    small<- tesselation |> 
+        subset(area < (0.05 / n) * shape_area) |>
+        sf::st_union() |>
+        sf::st_cast("POLYGON") |>
+        sf::st_sf(geometry = _)
+    small$tesselation<- small |>
+        sf::st_touches(good, sparse = TRUE) |>
+        lapply(`[[`, 1) |>
+        do.call(c, args = _)
+    small$area<- small |> sf::st_area()
+    small$tesselation[is.na(small$tesselation)]<- max(good$tesselation) +
+        seq(sum(is.na(small$tesselation)))
+
+    fixed_tesselation<- rbind(good, small) |>
+        (\(x) aggregate(x[, "area"], by = list(x$tesselation), FUN = sum))() |>
+        (\(x) {colnames(x)[1]<- "tesselation"; x})()
+    return(fixed_tesselation)
+}
 #' Create a directed adjacency matrix from a tesselation
 #' 
 #' The tesselation is converted into a directed acyclic graph
