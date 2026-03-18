@@ -35,7 +35,7 @@ tesselate<- function(shape, n, type = "hexagonal") {
         sf::st_sf(geometry = _)
     small$tesselation<- small |>
         sf::st_touches(good, sparse = TRUE) |>
-        lapply(`[[`, 1) |>
+        lapply(\(x) {if(length(x) == 0) x<- NA; x[[1]]}) |>
         do.call(c, args = _)
     small$area<- small |> sf::st_area()
     small$tesselation[is.na(small$tesselation)]<- max(good$tesselation) +
@@ -43,9 +43,47 @@ tesselate<- function(shape, n, type = "hexagonal") {
 
     fixed_tesselation<- rbind(good, small) |>
         (\(x) aggregate(x[, "area"], by = list(x$tesselation), FUN = sum))() |>
-        (\(x) {colnames(x)[1]<- "tesselation"; x})()
+        (\(x) {colnames(x)[1]<- "tesselation"; x})() |>
+        sf::st_sf()
     return(fixed_tesselation)
 }
+
+#' Compute at-sea distance
+#' 
+#' @param from, to
+#'     sf objects
+#' @param tesselation
+#'     An sf object representing a tesselation of the region
+#' 
+#' @return A matrix giving the distances between from and to geometries.
+#' 
+#' @export
+at_sea_distance<- (\(from, to, tesselation) {
+    graph<- tesselation |>
+        (\(x) {
+            adj<- x |> sf::st_touches(sparse = FALSE)
+            dist<- x |> 
+                sf::st_centroid() |>
+                sf::st_distance() |>
+                units::drop_units()
+            graph<- (adj * dist) |>
+                igraph::graph_from_adjacency_matrix(
+                    mode = "undirected",
+                    weighted = TRUE
+                )
+            graph
+        })()
+    from_intersection<- from |>
+        sf::st_intersects(tesselation, sparse = TRUE)
+    to_intersection<- to |>
+        sf::st_intersects(tesselation, sparse = TRUE)
+    distances<- outer(
+        from_intersection,
+        to_intersection,
+        (\(x, y) distances(graph, x, y) |> min()) |> Vectorize()
+    )
+    distances
+})
 #' Create a directed adjacency matrix from a tesselation
 #' 
 #' The tesselation is converted into a directed acyclic graph
