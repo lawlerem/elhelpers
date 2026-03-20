@@ -7,7 +7,7 @@
 \usage{
 softplus(x)
 
-isoftplus(y)
+isoftplus(x)
 }
 \arguments{
 \item{x}{An unbounded numeric vector}
