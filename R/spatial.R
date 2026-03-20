@@ -80,7 +80,7 @@ at_sea_distance<- (\(from, to, tesselation) {
     distances<- outer(
         from_intersection,
         to_intersection,
-        (\(x, y) distances(graph, x, y) |> min()) |> Vectorize()
+        (\(x, y) igraph::distances(graph, x, y) |> min()) |> Vectorize()
     )
     distances
 })
