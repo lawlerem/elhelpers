@@ -1,13 +1,12 @@
 Package: elhelpers
 Title: Helper functions used in many analyses
-Version: 0.1.11
+Version: 0.1.12
 Authors@R: 
     person("Ethan", "Lawler", , "lawlerem@gmail.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
 License: Apache License (>= 2)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Suggests: 
     RTMB
 Imports: 
@@ -18,3 +17,4 @@ Imports:
     utils
 Depends: 
     R (>= 4.3.0)
+Config/roxygen2/version: 8.1.0

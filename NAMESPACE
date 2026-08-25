@@ -7,12 +7,17 @@ export(ddirichlet)
 export(icrl)
 export(isoftplus)
 export(make_cell_key)
+export(rdirichlet)
 export(softplus)
 export(st_repolygonize)
 export(tesselate)
-importFrom(igraph,distances)
-importFrom(igraph,graph_from_adjacency_matrix)
-importFrom(stats,plogis)
-importFrom(stats,qlogis)
-importFrom(stats,setNames)
+importFrom(igraph,
+  distances,
+  graph_from_adjacency_matrix
+)
+importFrom(stats,
+  plogis,
+  qlogis,
+  setNames
+)
 importFrom(utils,head)

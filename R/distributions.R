@@ -28,3 +28,25 @@ ddirichlet<- function(x, pi, concentration, log = TRUE) {
     if( !log ) ll<- ll |> exp()
     return(ll)
 }
+
+#' Dirichlet distribution
+#' 
+#' @param n 
+#'     The number of Dirichlet samples
+#' @param pi 
+#'     The expected probability vector
+#' @param concentration 
+#'     The expected closeness of x to y
+#' 
+#' @return A n * length(pi) matrix
+#' 
+#' @export
+rdirichlet<- function(n, pi, concentration) {
+    alpha<- concentration * pi
+    Y<- alpha |> sapply(\(a) rgamma(n, shape = a, scale = 1))
+    dim(Y)<- c(n, length(pi))
+    Y<- sweep(Y, 1, rowSums(Y), `/`)
+    return(Y)
+}
+
+
