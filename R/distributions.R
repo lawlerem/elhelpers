@@ -50,3 +50,44 @@ rdirichlet<- function(n, pi, concentration) {
 }
 
 
+#' Gamma distribution parameterized with mean and variance
+#'
+#' @param x
+#'     A positive numeric variable
+#' @param mean
+#'     Mean of the Gamma distribution
+#' @param var
+#'     Variance of the Gamma distribution
+#' @param log
+#'     Should the log density be returned?
+#'
+#' @export
+dgammamv<- function(x, mean, var, log = TRUE) {
+    # shape = a; scale = s
+    # mu = a * s; var = a * s^2
+    # mu = a * s; var = mu * s
+    # s = mu / a; var = mu * mu / a
+    # s = mu / a; a = mu^2 / var
+    # s = mu / (mu^2 / var) = var / mu; a = mu^2 / var
+    stats::dgamma(x, shape = mean^2 / var, scale = var / mean, log = log)
+}
+
+#' Gamma distribution parameterized with mean and variance
+#'
+#' @param n
+#'     The number of Gamma samples
+#' @param mean
+#'     Mean of the Gamma distribution
+#' @param var
+#'     Variance of the Gamma distribution
+#'
+#' @export
+rgammamv<- function(n, mean, var) {
+    # shape = a; scale = s
+    # mu = a * s; var = a * s^2
+    # mu = a * s; var = mu * s
+    # s = mu / a; var = mu * mu / a
+    # s = mu / a; a = mu^2 / var
+    # s = mu / (mu^2 / var) = var / mu; a = mu^2 / var
+    stats::rgamma(n, shape = mean^2 / var, scale = var / mean)
+}

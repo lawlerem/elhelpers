@@ -4,10 +4,12 @@ export(at_sea_distance)
 export(crl)
 export(dagify)
 export(ddirichlet)
+export(dgammamv)
 export(icrl)
 export(isoftplus)
 export(make_cell_key)
 export(rdirichlet)
+export(rgammamv)
 export(softplus)
 export(st_repolygonize)
 export(tesselate)
@@ -16,8 +18,10 @@ importFrom(igraph,
   graph_from_adjacency_matrix
 )
 importFrom(stats,
+  dgamma,
   plogis,
   qlogis,
+  rgamma,
   setNames
 )
 importFrom(utils,head)
